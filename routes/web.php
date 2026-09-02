@@ -1,0 +1,80 @@
+<?php
+
+use App\Http\Controllers\Admin\ArticleBodyImageController;
+use App\Http\Controllers\AdvertisementRedirectController;
+use App\Http\Controllers\ArchiveController;
+use App\Http\Controllers\ArticleController;
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\HealthController;
+use App\Http\Controllers\HomeController;
+use App\Http\Controllers\PageController;
+use App\Http\Controllers\PreviewArticleController;
+use App\Http\Controllers\SitemapController;
+use App\Livewire\Admin\AdvertisementManager;
+use App\Livewire\Admin\ArticleForm;
+use App\Livewire\Admin\ArticleIndex;
+use App\Livewire\Admin\AuditLogIndex;
+use App\Livewire\Admin\CommentManager;
+use App\Livewire\Admin\Dashboard;
+use App\Livewire\Admin\MediaLibrary;
+use App\Livewire\Admin\MenuManager;
+use App\Livewire\Admin\PageForm;
+use App\Livewire\Admin\PageManager;
+use App\Livewire\Admin\RoleManager;
+use App\Livewire\Admin\SettingsManager;
+use App\Livewire\Admin\TaxonomyForm;
+use App\Livewire\Admin\TaxonomyManager;
+use App\Livewire\Admin\UserForm;
+use App\Livewire\Admin\UserManager;
+use App\Livewire\NewsSearch;
+use Illuminate\Support\Facades\Route;
+
+Route::get('/', HomeController::class)->name('home');
+Route::get('/health', HealthController::class)->name('health');
+Route::get('/terbaru', [ArticleController::class, 'latest'])->name('articles.latest');
+Route::get('/kanal/{category:slug}', [ArticleController::class, 'category'])->name('categories.show');
+Route::get('/berita/{article:slug}', [ArticleController::class, 'show'])->middleware('throttle:120,1')->name('articles.show');
+Route::get('/cari', NewsSearch::class)->middleware('throttle:30,1')->name('search');
+Route::get('/terpopuler', [ArchiveController::class, 'popular'])->name('articles.popular');
+Route::get('/tag/{tag:slug}', [ArchiveController::class, 'tag'])->name('tags.show');
+Route::get('/penulis/{user:username}', [ArchiveController::class, 'author'])->name('authors.show');
+Route::get('/foto', [ArchiveController::class, 'photos'])->name('articles.photos');
+Route::get('/video', [ArchiveController::class, 'videos'])->name('articles.videos');
+Route::get('/halaman/{page:slug}', [PageController::class, 'show'])->name('pages.show');
+Route::get('/{page:slug}', [PageController::class, 'show'])->whereIn('page', ['tentang', 'redaksi', 'pedoman-media-siber', 'privasi', 'kontak'])->name('pages.direct');
+Route::get('/iklan/{advertisement}/gambar', [AdvertisementRedirectController::class, 'image'])->middleware('throttle:120,1')->name('advertisements.image');
+Route::get('/iklan/{advertisement}/klik', [AdvertisementRedirectController::class, 'click'])->middleware('throttle:30,1')->name('advertisements.click');
+Route::get('/sitemap.xml', SitemapController::class)->name('sitemap');
+
+Route::middleware('guest')->group(function (): void {
+    Route::get('/login', [AuthController::class, 'create'])->name('login');
+    Route::post('/login', [AuthController::class, 'store'])->middleware('throttle:6,1')->name('login.store');
+});
+Route::post('/logout', [AuthController::class, 'destroy'])->middleware('auth')->name('logout');
+
+Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(function (): void {
+    Route::get('/', Dashboard::class)->name('dashboard');
+    Route::get('/articles', ArticleIndex::class)->name('articles.index');
+    Route::get('/articles/create', ArticleForm::class)->name('articles.create');
+    Route::get('/articles/{article}/edit', ArticleForm::class)->name('articles.edit');
+    Route::get('/articles/{article}/preview', PreviewArticleController::class)->name('articles.preview');
+    Route::post('/articles/body-images', ArticleBodyImageController::class)->middleware('throttle:30,1')->name('articles.body-images.store');
+    Route::get('/taxonomy', TaxonomyManager::class)->name('taxonomy.index');
+    Route::get('/taxonomy/categories/create', TaxonomyForm::class)->name('taxonomy.categories.create');
+    Route::get('/taxonomy/categories/{category}/edit', TaxonomyForm::class)->name('taxonomy.categories.edit');
+    Route::get('/taxonomy/tags/create', TaxonomyForm::class)->name('taxonomy.tags.create');
+    Route::get('/taxonomy/tags/{tag}/edit', TaxonomyForm::class)->name('taxonomy.tags.edit');
+    Route::get('/comments', CommentManager::class)->name('comments');
+    Route::get('/users', UserManager::class)->name('users.index');
+    Route::get('/users/create', UserForm::class)->name('users.create');
+    Route::get('/users/{user}/edit', UserForm::class)->name('users.edit');
+    Route::get('/roles', RoleManager::class)->name('roles');
+    Route::get('/pages', PageManager::class)->name('pages.index');
+    Route::get('/pages/create', PageForm::class)->name('pages.create');
+    Route::get('/pages/{page}/edit', PageForm::class)->name('pages.edit');
+    Route::get('/media', MediaLibrary::class)->name('media');
+    Route::get('/menus', MenuManager::class)->name('menus');
+    Route::get('/advertisements', AdvertisementManager::class)->name('advertisements');
+    Route::get('/settings', SettingsManager::class)->name('settings');
+    Route::get('/audit-logs', AuditLogIndex::class)->name('audit-logs');
+});

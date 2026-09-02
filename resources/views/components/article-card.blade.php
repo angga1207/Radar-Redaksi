@@ -1,0 +1,5 @@
+@props(['article', 'horizontal' => false])
+<article {{ $attributes->class([$horizontal ? 'grid grid-cols-[120px_1fr] gap-4 sm:grid-cols-[180px_1fr]' : 'group']) }}>
+    <a href="{{ route('articles.show', $article) }}" class="block overflow-hidden rounded-xl bg-muted"><img src="{{ $article->featured_image ?: asset('images/news-placeholder.svg') }}" alt="{{ $article->image_alt ?: $article->title }}" width="720" height="405" loading="lazy" class="aspect-video h-full w-full object-cover transition duration-300 group-hover:scale-[1.03]"></a>
+    <div class="{{ $horizontal ? '' : 'pt-3' }}"><a href="{{ route('categories.show', $article->category) }}" class="eyebrow">{{ $article->category->name }}</a><h3 class="mt-1 font-display text-xl font-bold leading-tight"><a class="hover:text-brand" href="{{ route('articles.show', $article) }}">{{ $article->title }}</a></h3><p class="mt-2 line-clamp-2 text-sm text-muted">{{ $article->excerpt }}</p><p class="mt-3 text-xs text-muted">{{ $article->published_at->locale('id')->diffForHumans() }} · {{ number_format($article->views_count) }} dibaca</p></div>
+</article>

@@ -1,0 +1,9 @@
+<div>
+    <a href="{{ route('admin.pages.index') }}" wire:navigate class="text-sm font-bold text-brand"><i class="fa-solid fa-arrow-left"></i> Kembali ke daftar</a>
+    <span class="eyebrow mt-5 block">Informasi portal</span><h1 class="mt-1 font-display text-3xl font-bold">{{ $page ? 'Edit halaman' : 'Tambah halaman' }}</h1>
+    <form wire:submit="save" class="mt-6 grid gap-6 xl:grid-cols-[1fr_320px]"><div class="admin-card grid gap-5">
+        <div><label class="label" for="page-title">Judul *</label><input id="page-title" wire:model="title" class="field"><p class="mt-1 text-xs text-muted">Alamat halaman dibuat otomatis saat pertama kali disimpan.</p>@error('title')<p class="field-error">{{ $message }}</p>@enderror</div>
+        <div><label class="label" for="page-body">Isi halaman *</label><x-form.rich-text id="page-body" property="body" :value="$body" />@error('body')<p class="field-error">{{ $message }}</p>@enderror</div>
+        <div class="grid gap-4 md:grid-cols-2"><div><label class="label" for="page-seo-title">Judul SEO</label><input id="page-seo-title" wire:model="seoTitle" class="field"></div><div><label class="label" for="page-seo-description">Deskripsi SEO</label><textarea id="page-seo-description" wire:model="seoDescription" rows="2" class="field"></textarea></div></div>
+    </div><aside class="admin-card grid content-start gap-4"><h2 class="font-bold">Publikasi</h2><div><label class="label" for="page-status">Status</label><div wire:ignore><select id="page-status" wire:model="status" data-tom-select data-placeholder="Pilih status"><option value="draft">Draft</option><option value="published">Terbit</option></select></div></div><button class="btn-primary w-full" wire:loading.attr="disabled"><span wire:loading.remove>Simpan halaman</span><span wire:loading>Menyimpan...</span></button></aside></form>
+</div>

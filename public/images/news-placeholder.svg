@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 675" role="img" aria-labelledby="title description">
+  <title id="title">Radar Redaksi</title>
+  <desc id="description">Gambar pengganti berita Radar Redaksi</desc>
+  <rect width="1200" height="675" fill="#111827"/>
+  <path d="M0 510 350 260l190 142 170-116 490 389H0Z" fill="#1f2937"/>
+  <circle cx="948" cy="155" r="78" fill="#f15a24" opacity=".92"/>
+  <text x="72" y="112" fill="#f15a24" font-family="Arial, sans-serif" font-size="34" font-weight="700">RADAR</text>
+  <text x="200" y="112" fill="#ffffff" font-family="Arial, sans-serif" font-size="34" font-weight="700" letter-spacing="5">REDAKSI</text>
+</svg>
