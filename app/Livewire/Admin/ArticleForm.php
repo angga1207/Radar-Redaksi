@@ -117,7 +117,7 @@ class ArticleForm extends Component
             'title' => ['required', 'string', 'max:255'],
             'slug' => ['required', 'alpha_dash', 'max:255', Rule::unique('articles', 'slug')->ignore($this->article?->id)],
             'excerpt' => ['nullable', 'string', 'max:500'],
-            'body' => ['required', 'string', 'min:50'],
+            'body' => ['required', 'string', 'min:0'],
             'status' => ['required', Rule::enum(ArticleStatus::class)],
             'contentType' => ['required', Rule::in(['article', 'photo', 'video'])],
             'carouselOrder' => ['integer', 'min:0', 'max:999'],
