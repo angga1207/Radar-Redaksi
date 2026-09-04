@@ -91,7 +91,7 @@ class ArticleForm extends Component
             $this->contentType = $article->content_type ?? 'article';
             $this->carouselOrder = $article->carousel_order ?? 0;
             $this->categoryId = (string) $article->category_id;
-            $this->tagIds = $article->tags()->pluck('tags.id')->map(fn ($id) => (string) $id)->all();
+            $this->tagIds = $article->tags()->pluck('tags.id')->map(fn($id) => (string) $id)->all();
             $this->featuredImage = $article->featured_image ?? '';
             $this->imageAlt = $article->image_alt ?? '';
             $this->imageCaption = $article->image_caption ?? '';
@@ -116,21 +116,25 @@ class ArticleForm extends Component
         $validated = $this->validate([
             'title' => ['required', 'string', 'max:255'],
             'slug' => ['required', 'alpha_dash', 'max:255', Rule::unique('articles', 'slug')->ignore($this->article?->id)],
-            'excerpt' => ['required', 'string', 'max:500'],
+            'excerpt' => ['nullable', 'string', 'max:500'],
             'body' => ['required', 'string', 'min:50'],
             'status' => ['required', Rule::enum(ArticleStatus::class)],
             'contentType' => ['required', Rule::in(['article', 'photo', 'video'])],
             'carouselOrder' => ['integer', 'min:0', 'max:999'],
             'categoryId' => ['required', 'exists:categories,id'],
-            'tagIds' => ['array'], 'tagIds.*' => ['exists:tags,id'],
-            'featuredImageUpload' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
+            'tagIds' => ['array'],
+            'tagIds.*' => ['exists:tags,id'],
+            'featuredImageUpload' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:51200'],
             'imageAlt' => ['nullable', 'string', 'max:255'],
             'imageCaption' => ['nullable', 'string', 'max:500'],
             'imageCredit' => ['nullable', 'string', 'max:255'],
-            'isFeatured' => ['boolean'], 'isHeadline' => ['boolean'], 'isBreaking' => ['boolean'],
+            'isFeatured' => ['boolean'],
+            'isHeadline' => ['boolean'],
+            'isBreaking' => ['boolean'],
             'allowComments' => ['boolean'],
             'scheduledAt' => ['nullable', 'date', 'after:now'],
-            'seoTitle' => ['nullable', 'string', 'max:255'], 'seoDescription' => ['nullable', 'string', 'max:320'],
+            'seoTitle' => ['nullable', 'string', 'max:255'],
+            'seoDescription' => ['nullable', 'string', 'max:320'],
             'changeNote' => ['nullable', 'string', 'max:255'],
         ]);
         $status = ArticleStatus::from($validated['status']);
@@ -142,15 +146,25 @@ class ArticleForm extends Component
         $saveArticle->execute($this->article, auth()->user(), [
             'author_id' => $this->article?->author_id ?? auth()->id(),
             'editor_id' => in_array($status, [ArticleStatus::Published, ArticleStatus::Scheduled], true) ? auth()->id() : $this->article?->editor_id,
-            'category_id' => $validated['categoryId'], 'title' => $validated['title'], 'slug' => $validated['slug'],
-            'content_type' => $validated['contentType'], 'carousel_order' => $validated['carouselOrder'],
-            'excerpt' => $validated['excerpt'], 'body' => HtmlSanitizer::clean($validated['body']),
-            'status' => $status, 'featured_image' => $featuredImage ? Storage::disk('public')->url($featuredImage) : ($this->featuredImage ?: null),
-            'image_alt' => $validated['imageAlt'] ?: null, 'image_caption' => $validated['imageCaption'] ?: null, 'image_credit' => $validated['imageCredit'] ?: null, 'is_featured' => $validated['isFeatured'],
-            'is_headline' => $validated['isHeadline'], 'is_breaking' => $validated['isBreaking'],
+            'category_id' => $validated['categoryId'],
+            'title' => $validated['title'],
+            'slug' => $validated['slug'],
+            'content_type' => $validated['contentType'],
+            'carousel_order' => $validated['carouselOrder'],
+            'excerpt' => $validated['excerpt'],
+            'body' => HtmlSanitizer::clean($validated['body']),
+            'status' => $status,
+            'featured_image' => $featuredImage ? Storage::disk('public')->url($featuredImage) : ($this->featuredImage ?: null),
+            'image_alt' => $validated['imageAlt'] ?: null,
+            'image_caption' => $validated['imageCaption'] ?: null,
+            'image_credit' => $validated['imageCredit'] ?: null,
+            'is_featured' => $validated['isFeatured'],
+            'is_headline' => $validated['isHeadline'],
+            'is_breaking' => $validated['isBreaking'],
             'published_at' => $status === ArticleStatus::Published ? ($this->article?->published_at ?? now()) : $this->article?->published_at,
             'scheduled_at' => $status === ArticleStatus::Scheduled ? $validated['scheduledAt'] : null,
-            'allow_comments' => $validated['allowComments'], 'seo_title' => $validated['seoTitle'] ?: null,
+            'allow_comments' => $validated['allowComments'],
+            'seo_title' => $validated['seoTitle'] ?: null,
             'seo_description' => $validated['seoDescription'] ?: null,
         ], $validated['tagIds'], $validated['changeNote'] ?: null);
         if ($featuredImage) {
@@ -184,12 +198,16 @@ class ArticleForm extends Component
             return;
         }
         $data = $this->validate([
-            'title' => ['required', 'string', 'max:255'], 'excerpt' => ['required', 'string', 'max:500'],
-            'body' => ['required', 'string', 'min:50'], 'categoryId' => ['required', 'exists:categories,id'],
-            'tagIds' => ['array'], 'tagIds.*' => ['exists:tags,id'],
+            'title' => ['required', 'string', 'max:255'],
+            'excerpt' => ['nullable', 'string', 'max:500'],
+            'body' => ['required', 'string', 'min:50'],
+            'categoryId' => ['required', 'exists:categories,id'],
+            'tagIds' => ['array'],
+            'tagIds.*' => ['exists:tags,id'],
         ]);
         $this->article->update([
-            'title' => $data['title'], 'excerpt' => $data['excerpt'],
+            'title' => $data['title'],
+            'excerpt' => $data['excerpt'],
             'body' => HtmlSanitizer::clean($data['body']),
             'category_id' => $data['categoryId'],
         ]);
@@ -206,7 +224,7 @@ class ArticleForm extends Component
         $this->title = $revision->title;
         $this->excerpt = $revision->excerpt;
         $this->body = $revision->body;
-        $this->changeNote = 'Memulihkan revisi '.$revision->created_at->format('d/m/Y H:i');
+        $this->changeNote = 'Memulihkan revisi ' . $revision->created_at->format('d/m/Y H:i');
         $this->dispatch('rich-text:set', property: 'body', value: $this->body);
     }
 
@@ -222,7 +240,7 @@ class ArticleForm extends Component
         $suffix = 2;
 
         while (Article::query()->where('slug', $slug)->exists()) {
-            $slug = $baseSlug.'-'.$suffix++;
+            $slug = $baseSlug . '-' . $suffix++;
         }
 
         return $slug;
