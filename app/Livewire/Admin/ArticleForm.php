@@ -115,7 +115,7 @@ class ArticleForm extends Component
         $this->slug = $this->article?->slug ?? $this->uniqueSlug($this->title);
         $validated = $this->validate([
             'title' => ['required', 'string', 'max:255'],
-            'slug' => ['required', 'alpha_dash', 'max:255', Rule::unique('articles', 'slug')->ignore($this->article?->id)],
+            // 'slug' => ['required', 'alpha_dash', 'max:255', Rule::unique('articles', 'slug')->ignore($this->article?->id)],
             'excerpt' => ['nullable', 'string', 'max:500'],
             'body' => ['required', 'string', 'min:0'],
             'status' => ['required', Rule::enum(ArticleStatus::class)],
@@ -148,7 +148,8 @@ class ArticleForm extends Component
             'editor_id' => in_array($status, [ArticleStatus::Published, ArticleStatus::Scheduled], true) ? auth()->id() : $this->article?->editor_id,
             'category_id' => $validated['categoryId'],
             'title' => $validated['title'],
-            'slug' => $validated['slug'],
+            // 'slug' => $validated['slug'],
+            'slug' => $this->article?->slug ?? $this->uniqueSlug($validated['title']),
             'content_type' => $validated['contentType'],
             'carousel_order' => $validated['carouselOrder'],
             'excerpt' => $validated['excerpt'],
